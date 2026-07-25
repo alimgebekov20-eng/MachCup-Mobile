@@ -5,7 +5,7 @@ import threading
 import time
 
 class OnlineManager:
-    def __init__(self, server_url='http://localhost:5000'):
+    def __init__(self, server_url = 'https://football-game.onrender.com'):
         self.server_url = server_url
         self.sio = socketio.Client()
         self.connected = False
