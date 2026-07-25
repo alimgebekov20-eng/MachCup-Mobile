@@ -1,4 +1,4 @@
-import sqlite3
+    import sqlite3
 import json
 import hashlib
 from datetime import datetime
@@ -479,4 +479,77 @@ class Database:
                 'id': row[0],
                 'player_id': row[1],
                 'pack_type': row[2],
-                'opened': bool(row[3
+                'opened': bool(row[3]),
+                'bought_at': row[4]
+            }
+        return None
+    
+    def open_pack(self, pack_id):
+        """Открытие пака"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            UPDATE packs SET opened = 1
+            WHERE id = ?
+        ''', (pack_id,))
+        
+        conn.commit()
+        conn.close()
+    
+    def update_crystals(self, player_id, amount):
+        """Обновление кристаллов"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            UPDATE stats SET crystals = crystals + ?
+            WHERE player_id = ?
+        ''', (amount, player_id))
+        
+        conn.commit()
+        conn.close()
+    
+    def get_player_achievements(self, player_id):
+        """Получение достижений игрока"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            SELECT achievement_id, unlocked_at
+            FROM achievements WHERE player_id = ?
+        ''', (player_id,))
+        
+        rows = c.fetchall()
+        conn.close()
+        
+        return [{'achievement_id': row[0], 'unlocked_at': row[1]} for row in rows]
+    
+    def unlock_achievement(self, player_id, achievement_id):
+        """Разблокировка достижения"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('''
+            INSERT INTO achievements (player_id, achievement_id)
+            VALUES (?, ?)
+        ''', (player_id, achievement_id))
+        
+        conn.commit()
+        conn.close()
+    
+    def get_all_achievements(self):
+        """Получение всех достижений"""
+        return [
+            {'id': 'first_goal', 'name': 'Первый гол', 'condition': 'first_goal', 'crystal_reward': 50},
+            {'id': 'hat_trick', 'name': 'Хет-трик', 'condition': 'hat_trick', 'crystal_reward': 100},
+            {'id': 'win_streak_5', 'name': '5 побед подряд', 'condition': 'win_streak_5', 'crystal_reward': 150},
+            {'id': 'win_streak_10', 'name': '10 побед подряд', 'condition': 'win_streak_10', 'crystal_reward': 300},
+            {'id': 'goals_100', 'name': '100 голов', 'condition': 'goals_100', 'crystal_reward': 200},
+            {'id': 'goals_500', 'name': '500 голов', 'condition': 'goals_500', 'crystal_reward': 500},
+            {'id': 'rating_60', 'name': 'Рейтинг 60', 'condition': 'rating_60', 'crystal_reward': 200},
+            {'id': 'rating_70', 'name': 'Рейтинг 70', 'condition': 'rating_70', 'crystal_reward': 400},
+            {'id': 'rating_80', 'name': 'Рейтинг 80', 'condition': 'rating_80', 'crystal_reward': 600},
+            {'id': 'rating_90', 'name': 'Рейтинг 90', 'condition': 'rating_90', 'crystal_reward': 1000},
+            {'id': 'tournament_win', 'name': 'Победитель турнира', 'condition': 'tournament_win', 'crystal_reward': 200}
+        ]
