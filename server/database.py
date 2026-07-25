@@ -1,4 +1,4 @@
-    import sqlite3
+import sqlite3
 import json
 import hashlib
 from datetime import datetime
@@ -44,13 +44,13 @@ class Database:
             )
         ''')
         
-        # Таблица инвентаря скинов
+        # Таблица инвентаря
         c.execute('''
             CREATE TABLE IF NOT EXISTS inventory (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 player_id INTEGER NOT NULL,
                 skin_name TEXT NOT NULL,
-                slot_id INTEGER,  -- 1-5 для экипированных
+                slot_id INTEGER,
                 rarity TEXT NOT NULL,
                 equipped BOOLEAN DEFAULT 0,
                 unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -81,24 +81,7 @@ class Database:
             )
         ''')
         
-        # Таблица истории матчей
-        c.execute('''
-            CREATE TABLE IF NOT EXISTS match_history (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                player1_id INTEGER NOT NULL,
-                player2_id INTEGER NOT NULL,
-                player1_score INTEGER NOT NULL,
-                player2_score INTEGER NOT NULL,
-                result TEXT NOT NULL,
-                stars_change INTEGER,
-                match_type TEXT NOT NULL,
-                played_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY(player1_id) REFERENCES players(id),
-                FOREIGN KEY(player2_id) REFERENCES players(id)
-            )
-        ''')
-        
-        # Таблица всех доступных скинов
+        # Таблица скинов
         c.execute('''
             CREATE TABLE IF NOT EXISTS skins (
                 name TEXT PRIMARY KEY,
@@ -115,15 +98,13 @@ class Database:
         conn.commit()
         conn.close()
         
-        # Добавляем скины если их нет
         self.init_skins()
     
     def init_skins(self):
-        """Инициализация таблицы скинов"""
+        """Инициализация скинов"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        # Проверяем есть ли скины
         c.execute('SELECT COUNT(*) FROM skins')
         count = c.fetchone()[0]
         
@@ -182,24 +163,15 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            INSERT INTO players (name, password_hash)
-            VALUES (?, ?)
-        ''', (player.name, player.password_hash))
-        
+        c.execute('INSERT INTO players (name, password_hash) VALUES (?, ?)',
+                 (player.name, player.password_hash))
         player_id = c.lastrowid
         
-        # Создаем запись статистики
-        c.execute('''
-            INSERT INTO stats (player_id, total_rating, base_rating, crystals)
-            VALUES (?, 50, 50, 100)
-        ''', (player_id,))
+        c.execute('INSERT INTO stats (player_id, total_rating, base_rating, crystals) VALUES (?, 50, 50, 100)',
+                 (player_id,))
         
-        # Добавляем стартовый скин
-        c.execute('''
-            INSERT INTO inventory (player_id, skin_name, rarity, equipped)
-            VALUES (?, 'Повязка', 'common', 1)
-        ''', (player_id,))
+        c.execute('INSERT INTO inventory (player_id, skin_name, rarity, equipped) VALUES (?, "Повязка", "common", 1)',
+                 (player_id,))
         
         conn.commit()
         conn.close()
@@ -257,10 +229,8 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        # Получаем текущую статистику
         current = self.get_player_stats(player_id)
         
-        # Обновляем
         new_matches = current['matches'] + stats_update.get('matches', 0)
         new_wins = current['wins'] + stats_update.get('wins', 0)
         new_losses = current['losses'] + stats_update.get('losses', 0)
@@ -270,7 +240,6 @@ class Database:
         new_crystals = current['crystals'] + stats_update.get('crystals', 0)
         new_rating = current['total_rating'] + stats_update.get('rating', 0)
         
-        # Обновляем стрик
         if stats_update.get('wins', 0) > 0:
             new_streak = current['streak'] + 1
             new_best_streak = max(current['best_streak'], new_streak)
@@ -283,16 +252,10 @@ class Database:
         
         c.execute('''
             UPDATE stats SET
-                matches = ?,
-                wins = ?,
-                losses = ?,
-                draws = ?,
-                goals_scored = ?,
-                goals_conceded = ?,
-                streak = ?,
-                best_streak = ?,
-                crystals = ?,
-                total_rating = ?
+                matches = ?, wins = ?, losses = ?, draws = ?,
+                goals_scored = ?, goals_conceded = ?,
+                streak = ?, best_streak = ?,
+                crystals = ?, total_rating = ?
             WHERE player_id = ?
         ''', (new_matches, new_wins, new_losses, new_draws, new_goals_scored,
               new_goals_conceded, new_streak, new_best_streak, new_crystals,
@@ -302,39 +265,24 @@ class Database:
         conn.close()
     
     def get_player_inventory(self, player_id):
-        """Получение инвентаря игрока"""
+        """Получение инвентаря"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            SELECT skin_name, slot_id, rarity, equipped, unlocked_at
-            FROM inventory WHERE player_id = ?
-        ''', (player_id,))
-        
+        c.execute('SELECT skin_name, slot_id, rarity, equipped, unlocked_at FROM inventory WHERE player_id = ?',
+                 (player_id,))
         rows = c.fetchall()
         conn.close()
         
-        inventory = []
-        for row in rows:
-            inventory.append({
-                'skin_name': row[0],
-                'slot_id': row[1],
-                'rarity': row[2],
-                'equipped': bool(row[3]),
-                'unlocked_at': row[4]
-            })
-        
-        return inventory
+        return [{'skin_name': r[0], 'slot_id': r[1], 'rarity': r[2], 'equipped': bool(r[3]), 'unlocked_at': r[4]} for r in rows]
     
     def add_skin_to_inventory(self, player_id, skin):
-        """Добавление скина в инвентарь"""
+        """Добавление скина"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            INSERT INTO inventory (player_id, skin_name, slot_id, rarity, equipped)
-            VALUES (?, ?, ?, ?, 0)
-        ''', (player_id, skin['name'], skin['slot_id'], skin['rarity']))
+        c.execute('INSERT INTO inventory (player_id, skin_name, slot_id, rarity, equipped) VALUES (?, ?, ?, ?, 0)',
+                 (player_id, skin['name'], skin['slot_id'], skin['rarity']))
         
         conn.commit()
         conn.close()
@@ -344,17 +292,10 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        # Снимаем все скины с этого слота
-        c.execute('''
-            UPDATE inventory SET equipped = 0
-            WHERE player_id = ? AND slot_id = ?
-        ''', (player_id, slot_id))
-        
-        # Экипируем новый скин
-        c.execute('''
-            UPDATE inventory SET equipped = 1
-            WHERE player_id = ? AND skin_name = ?
-        ''', (player_id, skin_name))
+        c.execute('UPDATE inventory SET equipped = 0 WHERE player_id = ? AND slot_id = ?',
+                 (player_id, slot_id))
+        c.execute('UPDATE inventory SET equipped = 1 WHERE player_id = ? AND skin_name = ?',
+                 (player_id, skin_name))
         
         conn.commit()
         conn.close()
@@ -364,11 +305,8 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            SELECT COUNT(*) FROM inventory
-            WHERE player_id = ? AND skin_name = ?
-        ''', (player_id, skin_name))
-        
+        c.execute('SELECT COUNT(*) FROM inventory WHERE player_id = ? AND skin_name = ?',
+                 (player_id, skin_name))
         count = c.fetchone()[0]
         conn.close()
         
@@ -379,11 +317,9 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        # Получаем базовый рейтинг
         c.execute('SELECT base_rating FROM stats WHERE player_id = ?', (player_id,))
         base = c.fetchone()[0]
         
-        # Получаем все экипированные скины
         c.execute('''
             SELECT s.rating_bonus FROM inventory i
             JOIN skins s ON i.skin_name = s.name
@@ -404,10 +340,19 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            UPDATE stats SET total_rating = ?
-            WHERE player_id = ?
-        ''', (total_rating, player_id))
+        c.execute('UPDATE stats SET total_rating = ? WHERE player_id = ?',
+                 (total_rating, player_id))
+        
+        conn.commit()
+        conn.close()
+    
+    def update_rating(self, player_id, bonus):
+        """Обновление рейтинга с бонусом"""
+        conn = sqlite3.connect(self.db_path)
+        c = conn.cursor()
+        
+        c.execute('UPDATE stats SET total_rating = MIN(total_rating + ?, 99) WHERE player_id = ?',
+                 (bonus, player_id))
         
         conn.commit()
         conn.close()
@@ -449,11 +394,8 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            INSERT INTO packs (player_id, pack_type, opened)
-            VALUES (?, ?, 0)
-        ''', (pack.player_id, pack.pack_type))
-        
+        c.execute('INSERT INTO packs (player_id, pack_type, opened) VALUES (?, ?, 0)',
+                 (pack.player_id, pack.pack_type))
         pack_id = c.lastrowid
         conn.commit()
         conn.close()
@@ -466,22 +408,13 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            SELECT id, player_id, pack_type, opened, bought_at
-            FROM packs WHERE id = ?
-        ''', (pack_id,))
-        
+        c.execute('SELECT id, player_id, pack_type, opened, bought_at FROM packs WHERE id = ?',
+                 (pack_id,))
         row = c.fetchone()
         conn.close()
         
         if row:
-            return {
-                'id': row[0],
-                'player_id': row[1],
-                'pack_type': row[2],
-                'opened': bool(row[3]),
-                'bought_at': row[4]
-            }
+            return {'id': row[0], 'player_id': row[1], 'pack_type': row[2], 'opened': bool(row[3]), 'bought_at': row[4]}
         return None
     
     def open_pack(self, pack_id):
@@ -489,11 +422,7 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            UPDATE packs SET opened = 1
-            WHERE id = ?
-        ''', (pack_id,))
-        
+        c.execute('UPDATE packs SET opened = 1 WHERE id = ?', (pack_id,))
         conn.commit()
         conn.close()
     
@@ -502,54 +431,19 @@ class Database:
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            UPDATE stats SET crystals = crystals + ?
-            WHERE player_id = ?
-        ''', (amount, player_id))
-        
+        c.execute('UPDATE stats SET crystals = crystals + ? WHERE player_id = ?',
+                 (amount, player_id))
         conn.commit()
         conn.close()
     
     def get_player_achievements(self, player_id):
-        """Получение достижений игрока"""
+        """Получение достижений"""
         conn = sqlite3.connect(self.db_path)
         c = conn.cursor()
         
-        c.execute('''
-            SELECT achievement_id, unlocked_at
-            FROM achievements WHERE player_id = ?
-        ''', (player_id,))
-        
+        c.execute('SELECT achievement_id, unlocked_at FROM achievements WHERE player_id = ?',
+                 (player_id,))
         rows = c.fetchall()
         conn.close()
         
-        return [{'achievement_id': row[0], 'unlocked_at': row[1]} for row in rows]
-    
-    def unlock_achievement(self, player_id, achievement_id):
-        """Разблокировка достижения"""
-        conn = sqlite3.connect(self.db_path)
-        c = conn.cursor()
-        
-        c.execute('''
-            INSERT INTO achievements (player_id, achievement_id)
-            VALUES (?, ?)
-        ''', (player_id, achievement_id))
-        
-        conn.commit()
-        conn.close()
-    
-    def get_all_achievements(self):
-        """Получение всех достижений"""
-        return [
-            {'id': 'first_goal', 'name': 'Первый гол', 'condition': 'first_goal', 'crystal_reward': 50},
-            {'id': 'hat_trick', 'name': 'Хет-трик', 'condition': 'hat_trick', 'crystal_reward': 100},
-            {'id': 'win_streak_5', 'name': '5 побед подряд', 'condition': 'win_streak_5', 'crystal_reward': 150},
-            {'id': 'win_streak_10', 'name': '10 побед подряд', 'condition': 'win_streak_10', 'crystal_reward': 300},
-            {'id': 'goals_100', 'name': '100 голов', 'condition': 'goals_100', 'crystal_reward': 200},
-            {'id': 'goals_500', 'name': '500 голов', 'condition': 'goals_500', 'crystal_reward': 500},
-            {'id': 'rating_60', 'name': 'Рейтинг 60', 'condition': 'rating_60', 'crystal_reward': 200},
-            {'id': 'rating_70', 'name': 'Рейтинг 70', 'condition': 'rating_70', 'crystal_reward': 400},
-            {'id': 'rating_80', 'name': 'Рейтинг 80', 'condition': 'rating_80', 'crystal_reward': 600},
-            {'id': 'rating_90', 'name': 'Рейтинг 90', 'condition': 'rating_90', 'crystal_reward': 1000},
-            {'id': 'tournament_win', 'name': 'Победитель турнира', 'condition': 'tournament_win', 'crystal_reward': 200}
-        ]
+        return [{'achievement_id': r[0], 'unlocked_at': r[1]} for r in rows]
