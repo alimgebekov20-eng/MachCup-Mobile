@@ -1,0 +1,364 @@
+{
+  "skins": [
+    {
+      "name": "Повязка",
+      "slot": 1,
+      "rarity": "common",
+      "rating_bonus": 0,
+      "bonuses": {
+        "speed": 1,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Бандана",
+      "slot": 1,
+      "rarity": "uncommon",
+      "rating_bonus": 1,
+      "bonuses": {
+        "speed": 3,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Шлем",
+      "slot": 1,
+      "rarity": "rare",
+      "rating_bonus": 2,
+      "bonuses": {
+        "speed": 5,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 2
+      }
+    },
+    {
+      "name": "Корона",
+      "slot": 1,
+      "rarity": "epic",
+      "rating_bonus": 5,
+      "bonuses": {
+        "speed": 8,
+        "power": 0,
+        "accuracy": 5,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Золотой шлем",
+      "slot": 1,
+      "rarity": "legendary",
+      "rating_bonus": 8,
+      "bonuses": {
+        "speed": 12,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 8
+      }
+    },
+    {
+      "name": "Нимб бога",
+      "slot": 1,
+      "rarity": "mythic",
+      "rating_bonus": 10,
+      "bonuses": {
+        "speed": 20,
+        "power": 0,
+        "accuracy": 10,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Майка",
+      "slot": 2,
+      "rarity": "common",
+      "rating_bonus": 0,
+      "bonuses": {
+        "speed": 0,
+        "power": 1,
+        "accuracy": 0,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Футболка",
+      "slot": 2,
+      "rarity": "uncommon",
+      "rating_bonus": 1,
+      "bonuses": {
+        "speed": 0,
+        "power": 3,
+        "accuracy": 0,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Броня",
+      "slot": 2,
+      "rarity": "rare",
+      "rating_bonus": 2,
+      "bonuses": {
+        "speed": 0,
+        "power": 5,
+        "accuracy": 0,
+        "defense": 2
+      }
+    },
+    {
+      "name": "Латы",
+      "slot": 2,
+      "rarity": "epic",
+      "rating_bonus": 5,
+      "bonuses": {
+        "speed": 0,
+        "power": 8,
+        "accuracy": 0,
+        "defense": 5
+      }
+    },
+    {
+      "name": "Золотая броня",
+      "slot": 2,
+      "rarity": "legendary",
+      "rating_bonus": 8,
+      "bonuses": {
+        "speed": 0,
+        "power": 12,
+        "accuracy": 0,
+        "defense": 8
+      }
+    },
+    {
+      "name": "Доспехи бога",
+      "slot": 2,
+      "rarity": "mythic",
+      "rating_bonus": 10,
+      "bonuses": {
+        "speed": 0,
+        "power": 20,
+        "accuracy": 0,
+        "defense": 10
+      }
+    },
+    {
+      "name": "Шорты",
+      "slot": 3,
+      "rarity": "common",
+      "rating_bonus": 0,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 1,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Наголенники",
+      "slot": 3,
+      "rarity": "uncommon",
+      "rating_bonus": 1,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 3,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Щитки",
+      "slot": 3,
+      "rarity": "rare",
+      "rating_bonus": 2,
+      "bonuses": {
+        "speed": 2,
+        "power": 0,
+        "accuracy": 5,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Поножи",
+      "slot": 3,
+      "rarity": "epic",
+      "rating_bonus": 5,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 8,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Золотые поножи",
+      "slot": 3,
+      "rarity": "legendary",
+      "rating_bonus": 8,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 12,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Ноги бога",
+      "slot": 3,
+      "rarity": "mythic",
+      "rating_bonus": 10,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 20,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Кеды",
+      "slot": 4,
+      "rarity": "common",
+      "rating_bonus": 0,
+      "bonuses": {
+        "speed": 1,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Кроссовки",
+      "slot": 4,
+      "rarity": "uncommon",
+      "rating_bonus": 1,
+      "bonuses": {
+        "speed": 3,
+        "power": 0,
+        "accuracy": 1,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Бутсы",
+      "slot": 4,
+      "rarity": "rare",
+      "rating_bonus": 2,
+      "bonuses": {
+        "speed": 5,
+        "power": 0,
+        "accuracy": 3,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Молнии",
+      "slot": 4,
+      "rarity": "epic",
+      "rating_bonus": 5,
+      "bonuses": {
+        "speed": 8,
+        "power": 0,
+        "accuracy": 5,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Золотые бутсы",
+      "slot": 4,
+      "rarity": "legendary",
+      "rating_bonus": 8,
+      "bonuses": {
+        "speed": 12,
+        "power": 0,
+        "accuracy": 8,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Ботинки бога",
+      "slot": 4,
+      "rarity": "mythic",
+      "rating_bonus": 10,
+      "bonuses": {
+        "speed": 20,
+        "power": 0,
+        "accuracy": 10,
+        "defense": 0
+      }
+    },
+    {
+      "name": "Нарукавник",
+      "slot": 5,
+      "rarity": "common",
+      "rating_bonus": 0,
+      "bonuses": {
+        "speed": 0,
+        "power": 0,
+        "accuracy": 0,
+        "defense": 1
+      }
+    },
+    {
+      "name": "Перчатки",
+      "slot": 5,
+      "rarity": "uncommon",
+      "rating_bonus": 1,
+      "bonuses": {
+        "speed": 0,
+        "power": 1,
+        "accuracy": 0,
+        "defense": 3
+      }
+    },
+    {
+      "name": "Напульсник",
+      "slot": 5,
+      "rarity": "rare",
+      "rating_bonus": 2,
+      "bonuses": {
+        "speed": 0,
+        "power": 3,
+        "accuracy": 0,
+        "defense": 5
+      }
+    },
+    {
+      "name": "Амулет",
+      "slot": 5,
+      "rarity": "epic",
+      "rating_bonus": 4,
+      "bonuses": {
+        "speed": 0,
+        "power": 5,
+        "accuracy": 0,
+        "defense": 8
+      }
+    },
+    {
+      "name": "Золотой амулет",
+      "slot": 5,
+      "rarity": "legendary",
+      "rating_bonus": 7,
+      "bonuses": {
+        "speed": 0,
+        "power": 8,
+        "accuracy": 0,
+        "defense": 12
+      }
+    },
+    {
+      "name": "Артефакт бога",
+      "slot": 5,
+      "rarity": "mythic",
+      "rating_bonus": 9,
+      "bonuses": {
+        "speed": 0,
+        "power": 10,
+        "accuracy": 0,
+        "defense": 20
+      }
+    }
+  ]
+}
