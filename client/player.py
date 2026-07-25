@@ -51,49 +51,56 @@ class Player:
             if bonuses:
                 for stat, bonus in bonuses.items():
                     if stat in self.final_stats:
-                        self.final_stats[stat] += bonus // 10  # Преобразуем проценты в очки
+                        # Преобразуем проценты в очки (1% = 0.1 очка)
+                        self.final_stats[stat] += bonus // 10
     
     def get_skin_bonus(self, skin_name):
         """Получение бонусов скина из JSON"""
-        # Загружаем данные скинов
         import json
         import os
         
         try:
-            with open('data/skins.json', 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                for skin in data['skins']:
-                    if skin['name'] == skin_name:
-                        return skin.get('bonuses', {})
+            # Пробуем загрузить из файла
+            if os.path.exists('data/skins.json'):
+                with open('data/skins.json', 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    for skin in data.get('skins', []):
+                        if skin['name'] == skin_name:
+                            return skin.get('bonuses', {})
         except:
             pass
         
-        # Если файл не найден - возвращаем дефолтные бонусы
+        # Дефолтные бонусы если файл не найден
         default_bonuses = {
+            # Слот 1: Голова
             'Повязка': {'speed': 1},
             'Бандана': {'speed': 3},
             'Шлем': {'speed': 5, 'defense': 2},
             'Корона': {'speed': 8, 'accuracy': 5},
             'Золотой шлем': {'speed': 12, 'defense': 8},
             'Нимб бога': {'speed': 20, 'accuracy': 10},
+            # Слот 2: Торс
             'Майка': {'power': 1},
             'Футболка': {'power': 3},
             'Броня': {'power': 5, 'defense': 2},
             'Латы': {'power': 8, 'defense': 5},
             'Золотая броня': {'power': 12, 'defense': 8},
             'Доспехи бога': {'power': 20, 'defense': 10},
+            # Слот 3: Ноги
             'Шорты': {'accuracy': 1},
             'Наголенники': {'accuracy': 3},
             'Щитки': {'speed': 2, 'accuracy': 5},
             'Поножи': {'accuracy': 8},
             'Золотые поножи': {'accuracy': 12},
             'Ноги бога': {'accuracy': 20},
+            # Слот 4: Ботинки
             'Кеды': {'speed': 1},
             'Кроссовки': {'speed': 3, 'accuracy': 1},
             'Бутсы': {'speed': 5, 'accuracy': 3},
             'Молнии': {'speed': 8, 'accuracy': 5},
             'Золотые бутсы': {'speed': 12, 'accuracy': 8},
             'Ботинки бога': {'speed': 20, 'accuracy': 10},
+            # Слот 5: Аксессуар
             'Нарукавник': {'defense': 1},
             'Перчатки': {'power': 1, 'defense': 3},
             'Напульсник': {'power': 3, 'defense': 5},
@@ -265,6 +272,12 @@ class Player:
         if self.is_player:
             # Рамка вокруг игрока
             pygame.draw.circle(screen, (0, 255, 255), (int(self.x), int(self.y)), self.radius + 4, 2)
+            
+            # Подсказка управления
+            controls = font.render('←↑↓→', True, (0, 255, 255))
+            controls_rect = controls.get_rect(center=(self.x, self.y + self.radius + 20))
+            screen.blit(controls, controls_rect)
+
 
 class Bot(Player):
     """Бот с искусственным интеллектом"""
@@ -283,14 +296,44 @@ class Bot(Player):
         
         # Настройка сложности
         difficulty_settings = {
-            'easy': {'speed': 0.5, 'accuracy': 0.4, 'aggression': 0.2, 'reaction': 30},
-            'medium': {'speed': 0.75, 'accuracy': 0.7, 'aggression': 0.5, 'reaction': 20},
-            'hard': {'speed': 0.95, 'accuracy': 0.9, 'aggression': 0.8, 'reaction': 10}
+            'easy': {
+                'speed': 0.5,
+                'accuracy': 0.4,
+                'aggression': 0.2,
+                'reaction': 30,
+                'pass_chance': 0.4,
+                'shoot_chance': 0.2
+            },
+            'medium': {
+                'speed': 0.75,
+                'accuracy': 0.7,
+                'aggression': 0.5,
+                'reaction': 20,
+                'pass_chance': 0.6,
+                'shoot_chance': 0.35
+            },
+            'hard': {
+                'speed': 0.95,
+                'accuracy': 0.9,
+                'aggression': 0.8,
+                'reaction': 10,
+                'pass_chance': 0.8,
+                'shoot_chance': 0.5
+            }
         }
         self.diff = difficulty_settings.get(difficulty, difficulty_settings['medium'])
         
         # Определяем роль по позиции
         self.role = self.determine_role()
+        
+        # Состояние бота
+        self.state = 'idle'  # 'idle', 'chasing', 'attacking', 'defending'
+        self.state_timer = 0
+        
+        # Специальные флаги для ботов
+        self.pass_target = None
+        self.shoot_target = None
+        self.dribble_timer = 0
     
     def determine_role(self):
         """Определение роли на поле"""
@@ -304,52 +347,25 @@ class Bot(Player):
     def update(self, ball, players, goalkeepers, goals):
         """Обновление ИИ бота"""
         self.action_timer += 1
+        self.state_timer += 1
+        self.dribble_timer = max(0, self.dribble_timer - 1)
         
         # Обновляем роль каждые 5 секунд
         if self.action_timer % 300 == 0:
             self.role = self.determine_role()
         
-        # Поиск цели в зависимости от роли
-        if self.role == 'defender':
-            # Защитник: держится ближе к своим воротам
-            if self.team == 'home':
-                self.target_x = 200 + random.randint(-30, 30)
-                self.target_y = 350 + random.randint(-50, 50)
-            else:
-                self.target_x = 900 + random.randint(-30, 30)
-                self.target_y = 350 + random.randint(-50, 50)
-            
-            # Если мяч рядом - перехват
-            if self.distance_to(ball) < 150:
-                self.target_x = ball.x
-                self.target_y = ball.y
+        # Определяем состояние
+        self.determine_state(ball, players)
         
-        elif self.role == 'forward':
-            # Нападающий: у чужих ворот
-            if self.team == 'home':
-                self.target_x = 1000 + random.randint(-50, 0)
-                self.target_y = 350 + random.randint(-80, 80)
-            else:
-                self.target_x = 150 + random.randint(0, 50)
-                self.target_y = 350 + random.randint(-80, 80)
-            
-            # Если мяч в атаке - бежим за ним
-            if self.team == 'home' and ball.x > 400:
-                self.target_x = ball.x + 30
-                self.target_y = ball.y
-            elif self.team == 'away' and ball.x < 600:
-                self.target_x = ball.x - 30
-                self.target_y = ball.y
-        
-        else:  # midfielder
-            # Полузащитник: центр поля
-            self.target_x = 500 + random.randint(-100, 100)
-            self.target_y = 350 + random.randint(-100, 100)
-            
-            # Если мяч рядом - перехват
-            if self.distance_to(ball) < 200:
-                self.target_x = ball.x
-                self.target_y = ball.y
+        # Выбираем цель в зависимости от состояния
+        if self.state == 'defending':
+            self.update_defending(ball, goals)
+        elif self.state == 'attacking':
+            self.update_attacking(ball, goals)
+        elif self.state == 'chasing':
+            self.update_chasing(ball)
+        else:  # idle
+            self.update_idle(ball, goals)
         
         # Движение к цели
         self.move_to_target()
@@ -365,6 +381,115 @@ class Bot(Player):
         if self.pass_cooldown > 0:
             self.pass_cooldown -= 1
     
+    def determine_state(self, ball, players):
+        """Определение текущего состояния бота"""
+        # Если у меня мяч - атакую
+        if self.has_ball:
+            self.state = 'attacking'
+            return
+        
+        # Если мяч у противника
+        enemy_with_ball = None
+        for player in players:
+            if player.team != self.team and player.has_ball:
+                enemy_with_ball = player
+                break
+        
+        if enemy_with_ball:
+            # Если я рядом с противником - преследую
+            if self.distance_to(enemy_with_ball) < 200:
+                self.state = 'chasing'
+                return
+            # Иначе защищаюсь
+            self.state = 'defending'
+            return
+        
+        # Мяч свободен - если я ближе всех, то преследую
+        my_distance = self.distance_to(ball)
+        closest = True
+        for player in players:
+            if player != self and player.team == self.team and player.distance_to(ball) < my_distance:
+                closest = False
+                break
+        
+        if closest and my_distance < 300:
+            self.state = 'chasing'
+        else:
+            # Если я нападающий - иду в атаку
+            if self.role == 'forward':
+                self.state = 'attacking'
+            else:
+                self.state = 'idle'
+    
+    def update_defending(self, ball, goals):
+        """Обновление в защите"""
+        # Держимся ближе к своим воротам
+        if self.team == 'home':
+            self.target_x = 200 + random.randint(-30, 30)
+            self.target_y = 350 + random.randint(-80, 80)
+        else:
+            self.target_x = 900 + random.randint(-30, 30)
+            self.target_y = 350 + random.randint(-80, 80)
+        
+        # Если мяч рядом - перехват
+        if self.distance_to(ball) < 150:
+            self.target_x = ball.x
+            self.target_y = ball.y
+    
+    def update_attacking(self, ball, goals):
+        """Обновление в атаке"""
+        # Находим ворота противника
+        enemy_goal = goals[1] if self.team == 'home' else goals[0]
+        goal_x = enemy_goal['x'] + enemy_goal['width'] / 2
+        goal_y = enemy_goal['y'] + enemy_goal['height'] / 2
+        
+        # Если у меня мяч - иду к воротам
+        if self.has_ball:
+            self.target_x = goal_x + random.randint(-50, 50)
+            self.target_y = goal_y + random.randint(-40, 40)
+        else:
+            # Иначе иду на свободное место
+            self.target_x = goal_x + random.randint(-100, 100)
+            self.target_y = goal_y + random.randint(-80, 80)
+        
+        # Если мяч рядом - бежим к нему
+        if self.distance_to(ball) < 150 and not self.has_ball:
+            self.target_x = ball.x
+            self.target_y = ball.y
+    
+    def update_chasing(self, ball):
+        """Обновление в преследовании"""
+        # Бежим к мячу
+        self.target_x = ball.x
+        self.target_y = ball.y
+        
+        # Если мяч ушел далеко - переходим в защиту
+        if self.distance_to(ball) > 300:
+            self.state = 'defending'
+    
+    def update_idle(self, ball, goals):
+        """Обновление в спокойном состоянии"""
+        # Занимаем позицию в зависимости от роли
+        if self.role == 'forward':
+            enemy_goal = goals[1] if self.team == 'home' else goals[0]
+            self.target_x = enemy_goal['x'] + enemy_goal['width'] / 2 + random.randint(-50, 50)
+            self.target_y = enemy_goal['y'] + enemy_goal['height'] / 2 + random.randint(-40, 40)
+        elif self.role == 'defender':
+            if self.team == 'home':
+                self.target_x = 200 + random.randint(-20, 20)
+                self.target_y = 350 + random.randint(-60, 60)
+            else:
+                self.target_x = 900 + random.randint(-20, 20)
+                self.target_y = 350 + random.randint(-60, 60)
+        else:  # midfielder
+            self.target_x = 500 + random.randint(-80, 80)
+            self.target_y = 350 + random.randint(-80, 80)
+        
+        # Каждые 3 секунды немного меняем позицию
+        if self.state_timer % 180 == 0:
+            self.target_x += random.randint(-50, 50)
+            self.target_y += random.randint(-50, 50)
+    
     def move_to_target(self):
         """Движение к цели"""
         dx = self.target_x - self.x
@@ -373,6 +498,9 @@ class Bot(Player):
         
         if dist > 5:
             speed = self.speed * self.diff['speed']
+            # Если близко к цели - замедляемся
+            if dist < 50:
+                speed *= (dist / 50)
             self.vx = (dx / dist) * speed
             self.vy = (dy / dist) * speed
             self.x += self.vx
@@ -385,14 +513,14 @@ class Bot(Player):
             self.stuck_counter += 1
             if self.stuck_counter > 30:  # 0.5 секунды
                 # Смена цели со случайным смещением
-                self.target_x += random.randint(-150, 150)
-                self.target_y += random.randint(-150, 150)
+                self.target_x += random.randint(-200, 200)
+                self.target_y += random.randint(-200, 200)
                 
                 # Если бот застрял у границы - разворачиваем
                 if self.x < 100:
-                    self.target_x = 600 + random.randint(0, 200)
+                    self.target_x = 600 + random.randint(0, 300)
                 elif self.x > 1100:
-                    self.target_x = 600 - random.randint(0, 200)
+                    self.target_x = 600 - random.randint(0, 300)
                 if self.y < 100:
                     self.target_y = 350 + random.randint(0, 200)
                 elif self.y > 600:
@@ -400,7 +528,7 @@ class Bot(Player):
                 
                 self.stuck_counter = 0
         else:
-            self.stuck_counter = max(0, self.stuck_counter - 1)
+            self.stuck_counter = max(0, self.stuck_counter - 2)
         
         self._last_x = self.x
         self._last_y = self.y
@@ -417,20 +545,24 @@ class Bot(Player):
                 goal_y = enemy_goal['y'] + enemy_goal['height'] / 2
                 
                 # Если близко к воротам
-                if self.distance_to_point(goal_x, goal_y) < 400:
+                if self.distance_to_point(goal_x, goal_y) < 500:
                     # Шанс удара зависит от сложности и роли
-                    shoot_chance = 0.3 * self.diff['accuracy']
+                    shoot_chance = self.diff['shoot_chance']
                     if self.role == 'forward':
+                        shoot_chance *= 1.3
+                    if self.distance_to_point(goal_x, goal_y) < 300:
+                        shoot_chance *= 1.2
+                    if self.dribble_timer > 20:  # Не дриблим слишком долго
                         shoot_chance *= 1.5
                     
                     if random.random() < shoot_chance:
                         # Удар с учетом точности
-                        goal_offset_y = random.randint(-40, 40)
+                        goal_offset_y = random.randint(-50, 50)
                         self.shoot(ball, goal_x, goal_y + goal_offset_y)
                         return
             
             # Пас партнеру
-            if self.pass_cooldown <= 0 and random.random() < 0.6 * self.diff['accuracy']:
+            if self.pass_cooldown <= 0 and random.random() < self.diff['pass_chance']:
                 teammates = [p for p in players if p != self and p.team == self.team and not p.has_ball]
                 if teammates:
                     # Выбираем лучшего партнера
@@ -449,6 +581,8 @@ class Bot(Player):
                         
                         if tm.role == 'forward':
                             score += 40
+                        if self.distance_to(tm) < 200:
+                            score += 20
                         
                         if score > best_score:
                             best_score = score
@@ -459,13 +593,15 @@ class Bot(Player):
                         self.pass_cooldown = 20
                         return
             
-            # Движение к воротам
-            enemy_goal = goals[1] if self.team == 'home' else goals[0]
-            self.target_x = enemy_goal['x'] + enemy_goal['width'] / 2 + random.randint(-50, 50)
-            self.target_y = enemy_goal['y'] + enemy_goal['height'] / 2 + random.randint(-50, 50)
+            # Дриблинг (движение к воротам)
+            if self.dribble_timer < 30:
+                enemy_goal = goals[1] if self.team == 'home' else goals[0]
+                self.target_x = enemy_goal['x'] + enemy_goal['width'] / 2 + random.randint(-30, 30)
+                self.target_y = enemy_goal['y'] + enemy_goal['height'] / 2 + random.randint(-30, 30)
+                self.dribble_timer += 1
             return
         
-        # Мяч у противника - перехват
+        # Мяч у противника - отбор
         enemy_with_ball = None
         for enemy in players:
             if enemy.team != self.team and enemy.has_ball:
@@ -481,13 +617,6 @@ class Bot(Player):
             if self.distance_to(enemy_with_ball) < 60 and random.random() < self.diff['aggression']:
                 self.tackle(ball)
                 return
-        
-        # Если мяч свободен - бежим к нему
-        if not any(p.has_ball for p in players):
-            # Проверяем, кто ближе к мячу
-            if self.distance_to(ball) < 200:
-                self.target_x = ball.x
-                self.target_y = ball.y
     
     def draw(self, screen):
         """Отрисовка бота"""
@@ -518,13 +647,15 @@ class Bot(Player):
         role_text = font.render(role_icons.get(self.role, ''), True, (255, 255, 255))
         screen.blit(role_text, (self.x + self.radius + 5, self.y - 10))
         
-        # Индикатор сложности
-        if self.difficulty == 'hard':
-            pygame.draw.circle(screen, (255, 0, 0), (int(self.x - self.radius - 5), int(self.y - self.radius - 5)), 3)
-        elif self.difficulty == 'medium':
-            pygame.draw.circle(screen, (255, 255, 0), (int(self.x - self.radius - 5), int(self.y - self.radius - 5)), 3)
-        else:
-            pygame.draw.circle(screen, (0, 255, 0), (int(self.x - self.radius - 5), int(self.y - self.radius - 5)), 3)
+        # Индикатор сложности (кружок рядом)
+        diff_colors = {
+            'easy': (0, 255, 0),
+            'medium': (255, 255, 0),
+            'hard': (255, 0, 0)
+        }
+        diff_color = diff_colors.get(self.difficulty, (255, 255, 255))
+        pygame.draw.circle(screen, diff_color, (int(self.x - self.radius - 8), int(self.y - self.radius - 8)), 4)
+
 
 class Goalkeeper(Player):
     """Вратарь"""
@@ -541,6 +672,9 @@ class Goalkeeper(Player):
         # Настройка вратаря
         self.reaction_speed = 15  # чем меньше, тем быстрее реакция
         self.max_speed = 4.5
+        self._last_x = x
+        self._last_y = y
+        self._stuck_counter = 0
     
     def update(self, ball, goals):
         """Обновление вратаря"""
@@ -565,15 +699,15 @@ class Goalkeeper(Player):
         dist_to_goal = math.hypot(ball.x - goal_x, ball.y - goal_y)
         
         if dist_to_goal < 250 and dist_to_ball < 300:
-            # Мяч близко к воротам - реакция
+            # Мяч близко к воротам - реакция с задержкой
             if self.reaction_timer > self.reaction_speed:
                 # Предсказываем движение мяча
                 predict_x = ball.x + ball.vx * 10
                 predict_y = ball.y + ball.vy * 10
                 
                 # Добавляем небольшой разброс для реалистичности
-                noise_x = random.randint(-10, 10)
-                noise_y = random.randint(-10, 10)
+                noise_x = random.randint(-15, 15)
+                noise_y = random.randint(-15, 15)
                 
                 self.target_x = predict_x + noise_x
                 self.target_y = predict_y + noise_y
@@ -581,7 +715,7 @@ class Goalkeeper(Player):
         else:
             # Возврат на линию ворот
             self.target_x = goal_x + 20
-            self.target_y = goal_y
+            self.target_y = goal_y + random.randint(-10, 10)
         
         # Движение к цели (с ограничением скорости)
         dx = self.target_x - self.x
@@ -600,19 +734,14 @@ class Goalkeeper(Player):
             self.x = max(50, min(150, self.x))
         else:
             self.x = max(1050, min(1150, self.x))
-        self.y = max(290, min(410, self.y))
+        self.y = max(280, min(420, self.y))
         
         # Проверка на застревание
-        if not hasattr(self, '_last_x'):
-            self._last_x = self.x
-            self._last_y = self.y
-            self._stuck_counter = 0
-        
         if abs(self.x - self._last_x) < 1 and abs(self.y - self._last_y) < 1:
             self._stuck_counter += 1
-            if self._stuck_counter > 60:
-                self.target_x = goal_x + 20 + random.randint(-20, 20)
-                self.target_y = goal_y + random.randint(-20, 20)
+            if self._stuck_counter > 60:  # 1 секунда
+                self.target_x = goal_x + 20 + random.randint(-30, 30)
+                self.target_y = goal_y + random.randint(-30, 30)
                 self._stuck_counter = 0
         else:
             self._stuck_counter = 0
@@ -676,6 +805,6 @@ class Goalkeeper(Player):
         
         # Линия штрафной (для наглядности)
         if self.team == 'home':
-            pygame.draw.rect(screen, (255, 255, 255, 50), (50, 280, 120, 140), 1)
+            pygame.draw.rect(screen, (255, 255, 255, 30), (50, 280, 120, 140), 1)
         else:
-            pygame.draw.rect(screen, (255, 255, 255, 50), (1050-120, 280, 120, 140), 1)
+            pygame.draw.rect(screen, (255, 255, 255, 30), (1050-120, 280, 120, 140), 1)
