@@ -43,12 +43,12 @@ class Game:
         """Инициализация команд"""
         # Персонажи
         characters = {
-            'Азиз': {'speed': 8, 'power': 9, 'accuracy': 7, 'defense': 7},
+            'Азиз': {'speed': 8, 'power': 9, 'accuracy': 7, 'defense': 4},
             'Хабиб': {'speed': 7, 'power': 7, 'accuracy': 7, 'defense': 7},
             'Абдул': {'speed': 6, 'power': 5, 'accuracy': 7, 'defense': 9},
             'Шамиль Рб': {'speed': 9, 'power': 6, 'accuracy': 6, 'defense': 5},
             'Шамиль Jr.': {'speed': 7, 'power': 8, 'accuracy': 8, 'defense': 6},
-            'Салаудин': {'speed': 5, 'power': 8, 'accuracy': 6, 'defense': 8}
+            'Салаудин': {'speed': 5, 'power': 9, 'accuracy': 8, 'defense': 8}
         }
         
         # Выбор состава в зависимости от режима
