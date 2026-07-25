@@ -1,0 +1,98 @@
+{
+  "characters": [
+    {
+      "name": "Азиз",
+      "role": "Атакующий",
+      "emoji": "⚡",
+      "color": "#FF6B35",
+      "base_stats": {
+        "speed": 8,
+        "power": 9,
+        "accuracy": 7,
+        "defense": 4
+      },
+      "description": "Скоростной нападающий с мощным ударом",
+      "starter_skin": "Повязка"
+    },
+    {
+      "name": "Хабиб",
+      "role": "Универсал",
+      "emoji": "🎯",
+      "color": "#00B4D8",
+      "base_stats": {
+        "speed": 7,
+        "power": 7,
+        "accuracy": 7,
+        "defense": 7
+      },
+      "description": "Сбалансированный игрок, мастер паса",
+      "starter_skin": "Майка"
+    },
+    {
+      "name": "Абдул",
+      "role": "Защитник",
+      "emoji": "🛡️",
+      "color": "#2D6A4F",
+      "base_stats": {
+        "speed": 6,
+        "power": 5,
+        "accuracy": 7,
+        "defense": 9
+      },
+      "description": "Надежный защитник, стена в обороне",
+      "starter_skin": "Шорты"
+    },
+    {
+      "name": "Шамиль Рб",
+      "role": "Быстрый",
+      "emoji": "🐺",
+      "color": "#E63946",
+      "base_stats": {
+        "speed": 9,
+        "power": 6,
+        "accuracy": 6,
+        "defense": 5
+      },
+      "description": "Молниеносный вингер, обводит всех",
+      "starter_skin": "Кеды"
+    },
+    {
+      "name": "Шамиль Jr.",
+      "role": "Техничный",
+      "emoji": "🎨",
+      "color": "#9B5DE5",
+      "base_stats": {
+        "speed": 7,
+        "power": 8,
+        "accuracy": 8,
+        "defense": 6
+      },
+      "description": "Техничный плеймейкер, дриблинг",
+      "starter_skin": "Нарукавник"
+    },
+    {
+      "name": "Салаудин",
+      "role": "Силовой",
+      "emoji": "💩",
+      "color": "#F77F00",
+      "base_stats": {
+        "speed": 5,
+        "power": 9,
+        "accuracy": 8,
+        "defense": 8
+      },
+      "description": "Физически мощный центрфорвард",
+      "starter_skin": "Футболка"
+    }
+  ],
+  "formations": {
+    "2x2": {
+      "home": ["Азиз", "Хабиб"],
+      "away": ["Шамиль Рб", "Шамиль Jr."]
+    },
+    "3x3": {
+      "home": ["Азиз", "Хабиб", "Абдул"],
+      "away": ["Шамиль Рб", "Шамиль Jr.", "Салаудин"]
+    }
+  }
+}
