@@ -1,34 +1,52 @@
 import pygame
 import sys
-import json
 import os
 from game import Game
-from ui import UI, Menu
-from online_manager import OnlineManager
+from ui import UI
 from save_manager import SaveManager
+from online_manager import OnlineManager
 
 class FootballGame:
     def __init__(self):
         pygame.init()
+        
+        # Устанавливаем иконку
+        try:
+            icon = pygame.image.load('assets/images/logo.png')
+            pygame.display.set_icon(icon)
+        except:
+            pass
+        
         self.screen = pygame.display.set_mode((1200, 700))
         pygame.display.set_caption("⚽ STREET FOOTBALL LEGENDS")
         self.clock = pygame.time.Clock()
         self.running = True
         
+        # Загрузка звуков
+        self.sounds = {}
+        try:
+            self.sounds['goal'] = pygame.mixer.Sound('assets/sounds/goal.wav')
+            self.sounds['kick'] = pygame.mixer.Sound('assets/sounds/kick.wav')
+            self.sounds['whistle'] = pygame.mixer.Sound('assets/sounds/whistle.wav')
+            self.sounds['click'] = pygame.mixer.Sound('assets/sounds/menu_click.wav')
+        except:
+            # Если звуков нет - создаем пустые
+            pass
+        
         # Менеджеры
         self.save_manager = SaveManager()
-        self.online_manager = OnlineManager()
-        
-        # Загрузка сохранения
         self.player_data = self.save_manager.load()
-        self.ui = UI(self.screen, self.player_data)
+        
+        # UI
+        self.ui = UI(self.screen, self.player_data, self.sounds)
         
         # Состояние
-        self.state = 'menu'  # 'menu', 'game', 'online', 'profile'
+        self.state = 'menu'
         self.game = None
+        self.online_manager = None
+        self.leaderboard_data = None
     
     def run(self):
-        """Главный игровой цикл"""
         while self.running:
             self.handle_events()
             
@@ -42,6 +60,11 @@ class FootballGame:
                 self.ui.draw_online_menu()
             elif self.state == 'profile':
                 self.ui.draw_profile()
+            elif self.state == 'leaderboard':
+                if self.leaderboard_data:
+                    self.ui.draw_leaderboard(self.leaderboard_data)
+                else:
+                    self.load_leaderboard()
             
             pygame.display.flip()
             self.clock.tick(60)
@@ -129,7 +152,7 @@ class FootballGame:
         if self.online_manager.connect():
             # Ищем соперника
             match_data = self.online_manager.find_match(
-                self.player_data['name'],
+                self.player_data['player_name'],  # ✅ ПРАВИЛЬНО
                 mode
             )
             if match_data:
