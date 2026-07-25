@@ -1,0 +1,148 @@
+{
+  "achievements": [
+    {
+      "id": "first_goal",
+      "name": "Первый гол",
+      "description": "Забей свой первый гол",
+      "icon": "⚽",
+      "crystal_reward": 50,
+      "condition": "goals_scored >= 1"
+    },
+    {
+      "id": "hat_trick",
+      "name": "Хет-трик",
+      "description": "Забей 3 гола в одном матче",
+      "icon": "🎯",
+      "crystal_reward": 100,
+      "condition": "goals_scored >= 3"
+    },
+    {
+      "id": "clean_sheet",
+      "name": "Сухая победа",
+      "description": "Победи со счетом 3:0",
+      "icon": "🧤",
+      "crystal_reward": 80,
+      "condition": "clean_sheet == true"
+    },
+    {
+      "id": "win_streak_5",
+      "name": "5 побед подряд",
+      "description": "Выиграй 5 матчей подряд",
+      "icon": "🔥",
+      "crystal_reward": 150,
+      "condition": "streak >= 5"
+    },
+    {
+      "id": "win_streak_10",
+      "name": "10 побед подряд",
+      "description": "Выиграй 10 матчей подряд",
+      "icon": "⚡",
+      "crystal_reward": 300,
+      "condition": "streak >= 10"
+    },
+    {
+      "id": "goals_100",
+      "name": "100 голов",
+      "description": "Забей 100 голов за карьеру",
+      "icon": "💯",
+      "crystal_reward": 200,
+      "condition": "goals_scored >= 100"
+    },
+    {
+      "id": "goals_500",
+      "name": "500 голов",
+      "description": "Забей 500 голов за карьеру",
+      "icon": "🏆",
+      "crystal_reward": 500,
+      "condition": "goals_scored >= 500"
+    },
+    {
+      "id": "rating_60",
+      "name": "Рейтинг 60",
+      "description": "Достигни рейтинга 60",
+      "icon": "🌟",
+      "crystal_reward": 200,
+      "condition": "rating >= 60"
+    },
+    {
+      "id": "rating_70",
+      "name": "Рейтинг 70",
+      "description": "Достигни рейтинга 70",
+      "icon": "🌟",
+      "crystal_reward": 400,
+      "condition": "rating >= 70"
+    },
+    {
+      "id": "rating_80",
+      "name": "Рейтинг 80",
+      "description": "Достигни рейтинга 80",
+      "icon": "🌟",
+      "crystal_reward": 600,
+      "condition": "rating >= 80"
+    },
+    {
+      "id": "rating_90",
+      "name": "Рейтинг 90",
+      "description": "Достигни рейтинга 90",
+      "icon": "👑",
+      "crystal_reward": 1000,
+      "condition": "rating >= 90"
+    },
+    {
+      "id": "rating_99",
+      "name": "Абсолют!",
+      "description": "Достигни максимального рейтинга 99",
+      "icon": "⭐",
+      "crystal_reward": 2000,
+      "condition": "rating >= 99"
+    },
+    {
+      "id": "tournament_win",
+      "name": "Победитель турнира",
+      "description": "Выиграй онлайн турнир",
+      "icon": "🏅",
+      "crystal_reward": 200,
+      "condition": "tournaments_won >= 1"
+    },
+    {
+      "id": "legendary_skin",
+      "name": "Легендарный скин",
+      "description": "Открой легендарный скин",
+      "icon": "✨",
+      "crystal_reward": 300,
+      "condition": "has_legendary_skin == true"
+    },
+    {
+      "id": "mythic_skin",
+      "name": "Мифический скин",
+      "description": "Открой мифический скин",
+      "icon": "⭐",
+      "crystal_reward": 500,
+      "condition": "has_mythic_skin == true"
+    },
+    {
+      "id": "collector_10",
+      "name": "Коллекционер",
+      "description": "Собери 10 разных скинов",
+      "icon": "📚",
+      "crystal_reward": 400,
+      "condition": "unique_skins >= 10"
+    },
+    {
+      "id": "collector_20",
+      "name": "Легендарный коллекционер",
+      "description": "Собери 20 разных скинов",
+      "icon": "🏛️",
+      "crystal_reward": 800,
+      "condition": "unique_skins >= 20"
+    },
+    {
+      "id": "collector_all",
+      "name": "Все скины!",
+      "description": "Собери все 30 скинов",
+      "icon": "👑",
+      "crystal_reward": 2000,
+      "condition": "unique_skins >= 30"
+    }
+  ]
+}
